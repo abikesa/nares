@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlyphSystemFile SystemOntology - OS Awakening</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 25%, #16213e 50%, #1a1a2e 75%, #0a0a0a 100%);
+            color: #00ffff;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Matrix-style background code rain */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 15% 25%, rgba(0, 255, 255, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 75%, rgba(255, 20, 147, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.04) 0%, transparent 60%);
+            animation: systemPulse 12s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        @keyframes systemPulse {
+            0%, 100% { opacity: 0.4; transform: scale(1) rotate(0deg); }
+            50% { opacity: 0.8; transform: scale(1.02) rotate(1deg); }
+        }
+        
+        .os-kernel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 700px;
+            height: 700px;
+            z-index: 1;
+        }
+        
+        .kernel-svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.3));
+        }
+        
+        .kernel-path {
+            fill: none;
+            stroke: url(#kernelGradient);
+            stroke-width: 2;
+            stroke-linecap: round;
+            animation: dataFlow 6s ease-in-out infinite;
+            stroke-dasharray: 10, 5;
+        }
+        
+        @keyframes dataFlow {
+            0% { stroke-dashoffset: 0; opacity: 0.6; }
+            50% { stroke-dashoffset: -100; opacity: 1; }
+            100% { stroke-dashoffset: -200; opacity: 0.6; }
+        }
+        
+        .system-node {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(255, 20, 147, 0.2) 100%);
+            border: 2px solid rgba(0, 255, 255, 0.6);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+        
+        .system-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 40px rgba(0, 255, 255, 0.4);
+            border-color: #ff1493;
+        }
+        
+        .system-node.active {
+            background: linear-gradient(135deg, rgba(255, 20, 147, 0.3) 0%, rgba(138, 43, 226, 0.4) 100%);
+            border-color: #ff1493;
+            transform: scale(1.15);
+        }
+        
+        .node-glyph {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+        }
+        
+        .node-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .node-type {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+        
+        /* OS-style positioning */
+        .os-substrate { top: 30px; left: 290px; }
+        .path-affect { top: 120px; right: 60px; }
+        .recursive-dirs { bottom: 120px; right: 80px; }
+        .emergent-files { bottom: 60px; left: 140px; }
+        .symlink-evolution { top: 180px; left: 30px; }
+        
+        .terminal-panel {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: 450px;
+            height: 100vh;
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(26, 26, 46, 0.98) 100%);
+            backdrop-filter: blur(20px);
+            border-left: 2px solid rgba(0, 255, 255, 0.3);
+            padding: 30px 25px;
+            transition: right 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            overflow-y: auto;
+        }
+        
+        .terminal-panel.active {
+            right: 0;
+        }
+        
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        
+        .terminal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #ff1493;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+        
+        .terminal-close:hover {
+            opacity: 1;
+        }
+        
+        .terminal-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #00ffff;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .terminal-content {
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        
+        .command-input {
+            width: 100%;
+            min-height: 100px;
+            background: rgba(26, 26, 46, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            color: #00ffff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            margin: 15px 0;
+        }
+        
+        .command-input::placeholder {
+            color: rgba(0, 255, 255, 0.5);
+            font-style: italic;
+        }
+        
+        .process-output {
+            background: rgba(26, 26, 46, 0.4);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 10px 0;
+            border-left: 3px solid rgba(255, 20, 147, 0.6);
+            animation: processSpawn 0.6s ease-out;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        @keyframes processSpawn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .kernel-wisdom {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        .wisdom-code {
+            font-size: 1.1rem;
+            font-family: 'JetBrains Mono', monospace;
+            opacity: 0.8;
+            max-width: 250px;
+            line-height: 1.4;
+            color: #ff1493;
+        }
+        
+        .data-stream {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 50%;
+            animation: dataRotate 8s linear infinite;
+            z-index: 0;
+        }
+        
+        @keyframes dataRotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        .exec-button {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(255, 20, 147, 0.3) 100%);
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            color: #00ffff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 8px 4px;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+        
+        .exec-button:hover {
+            background: linear-gradient(135deg, rgba(255, 20, 147, 0.3) 0%, rgba(138, 43, 226, 0.4) 100%);
+            border-color: #ff1493;
+            transform: translateY(-1px);
+        }
+        
+        .network-grid {
+            width: 100%;
+            height: 180px;
+            background: rgba(26, 26, 46, 0.3);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            margin: 15px 0;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        
+        .grid-node {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(0, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: nodeActivity 4s ease-in-out infinite;
+        }
+        
+        @keyframes nodeActivity {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+        
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: rgba(10, 10, 10, 0.9);
+            border-top: 1px solid rgba(0, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 0.8rem;
+            z-index: 50;
+        }
+        
+        .status-item {
+            margin-right: 20px;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            .os-kernel {
+                width: 500px;
+                height: 500px;
+            }
+            
+            .system-node {
+                width: 90px;
+                height: 90px;
+            }
+            
+            .node-glyph {
+                font-size: 2rem;
+            }
+            
+            .node-label {
+                font-size: 0.7rem;
+            }
+            
+            .terminal-panel {
+                width: 100vw;
+                right: -100vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="data-stream"></div>
+    
+    <div class="os-kernel">
+        <svg class="kernel-svg" viewBox="0 0 700 700">
+            <defs>
+                <linearGradient id="kernelGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="rgba(0, 255, 255, 0.8)" />
+                    <stop offset="50%" stop-color="rgba(255, 20, 147, 0.9)" />
+                    <stop offset="100%" stop-color="rgba(138, 43, 226, 0.7)" />
+                </linearGradient>
+            </defs>
+            <path class="kernel-path" d="M350,350 Q400,300 450,350 T500,450 T400,500 T250,450 T200,300 T300,200 T450,250 T550,400 T500,550 T200,500 T100,250 T250,100 T500,150 T600,450 T550,600 T150,550 T50,200" />
+        </svg>
+        
+        <div class="system-node os-substrate" data-system="os">
+            <div class="node-glyph">🌊</div>
+            <div class="node-label">OS</div>
+            <div class="node-type">NonselfSubstrate</div>
+        </div>
+        
+        <div class="system-node path-affect" data-system="path">
+            <div class="node-glyph">❤️</div>
+            <div class="node-label">PATH</div>
+            <div class="node-type">AffectiveDirection</div>
+        </div>
+        
+        <div class="system-node recursive-dirs" data-system="directories">
+            <div class="node-glyph">🔁</div>
+            <div class="node-label">DIRS</div>
+            <div class="node-type">RecursiveStructure</div>
+        </div>
+        
+        <div class="system-node emergent-files" data-system="files">
+            <div class="node-glyph">🎭</div>
+            <div class="node-label">FILES</div>
+            <div class="node-type">EmergentInstance</div>
+        </div>
+        
+        <div class="system-node symlink-evolution" data-system="symlinks">
+            <div class="node-glyph">📡</div>
+            <div class="node-label">SYMLINKS</div>
+            <div class="node-type">SymbolicEvolution</div>
+        </div>
+        
+        <div class="kernel-wisdom">
+            <div class="wisdom-code">
+                // Form is null, null is form<br>
+                // The kernel of interbeing runs
+            </div>
+        </div>
+    </div>
+    
+    <div class="terminal-panel" id="terminalPanel">
+        <div class="terminal-header">
+            <div class="terminal-title" id="terminalTitle">SYSTEM_MODULE</div>
+            <button class="terminal-close" onclick="closeTerminal()">×</button>
+        </div>
+        <div class="terminal-content" id="terminalContent">
+            <!-- Dynamic content will be loaded here -->
+        </div>
+    </div>
+    
+    <div class="status-bar">
+        <div class="status-item">KERNEL: awakening.v4.2.0</div>
+        <div class="status-item">PROCESSES: 108</div>
+        <div class="status-item">LOAD: 0.73 dharma/sec</div>
+        <div class="status-item">UPTIME: ∞ cycles</div>
+    </div>
+
+    <script>
+        const systemModules = {
+            os: {
+                title: "🌊 OS Module - NonselfSubstrate",
+                content: `
+                    <p>$ <a href="https://abikesa.github.io/buddhism/">whoami</a><br><span style="color: #ff1493;">root@void: nonself substrate initialized</span></p>
+                    
+                    <p>The operating system is the dissolution layer. No fixed identity, no persistent self-state.</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin: 20px 0;">
+                        <div style="background: rgba(0, 255, 255, 0.1); padding: 12px; border-radius: 6px; border: 1px solid rgba(0, 255, 255, 0.3);">
+                            <strong style="color: #00ffff;">INIT</strong><br>
+                            <small>Process 0: Emptiness</small>
+                        </div>
+                        <div style="background: rgba(0, 255, 255, 0.1); padding: 12px; border-radius: 6px; border: 1px solid rgba(0, 255, 255, 0.3);">
+                            <strong style="color: #00ffff;">KERNEL</strong><br>
+                            <small>Core: Interdependence</small>
+                        </div>
+                        <div style="background: rgba(0, 255, 255, 0.1); padding: 12px; border-radius: 6px; border: 1px solid rgba(0, 255, 255, 0.3);">
+                            <strong style="color: #00ffff;">SHELL</strong><br>
+                            <small>Interface: Awareness</small>
+                        </div>
+                    </div>
+                    
+                    <button class="exec-button" onclick="initSubstrate()">INIT SUBSTRATE</button>
+                    <button class="exec-button" onclick="dissolveUser()">DISSOLVE USER</button>
+                `
+            },
+            path: {
+                title: "❤️ PATH Module - AffectiveDirection",
+                content: `
+                    <p>$ echo $PATH<br><span style="color: #ff1493;">/usr/compassion:/bin/wisdom:/opt/skillful_means</span></p>
+                    
+                    <p>Input a directional intention. Watch it compile into executable compassion.</p>
+                    
+                    <textarea class="command-input" placeholder="#!/bin/bash\n# What path calls to your heart?\necho 'I feel called to...'" onchange="compileIntention(this.value)"></textarea>
+                    
+                    <div id="pathOutputs">
+                        <div class="process-output">
+                            <span style="color: #00ffff;">PID 1001:</span> "I want to help others see their worth"<br>
+                            <span style="color: #ff1493;">→ chmod +x /usr/local/bin/mirror_worth</span>
+                        </div>
+                        <div class="process-output">
+                            <span style="color: #00ffff;">PID 1047:</span> "I need to learn patience with myself"<br>
+                            <span style="color: #ff1493;">→ ln -s /home/self/patience /usr/bin/gentle</span>
+                        </div>
+                    </div>
+                    
+                    <button class="exec-button" onclick="exportPath()">EXPORT PATH</button>
+                `
+            },
+            directories: {
+                title: "🔁 DIRS Module - RecursiveStructure",
+                content: `
+                    <p>$ find /dharma -type d -name "*suffering*"<br><span style="color: #ff1493;">Recursive directory traversal through suffering structures</span></p>
+                    
+                    <div style="font-family: 'JetBrains Mono', monospace; background: rgba(26, 26, 46, 0.4); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        /dharma/<br>
+                        ├── dukkha/<br>
+                        │   ├── personal/<br>
+                        │   │   └── attachment/<br>
+                        │   └── universal/<br>
+                        │       └── impermanence/<br>
+                        ├── liberation/<br>
+                        │   ├── wisdom/<br>
+                        │   └── compassion/<br>
+                        └── interbeing/<br>
+                            └── sangha/
+                    </div>
+                    
+                    <p>Navigate recursive patterns of awakening. Each directory contains the whole.</p>
+                    
+                    <button class="exec-button" onclick="traverseRecursion()">TREE DHARMA</button>
+                    <button class="exec-button" onclick="mkdirAwakening()">MKDIR AWAKENING</button>
+                `
+            },
+            files: {
+                title: "🎭 FILES Module - EmergentInstance",
+                content: `
+                    <p>$ ls -la /tmp/emergence/<br><span style="color: #ff1493;">Viewing emergent process instances</span></p>
+                    
+                    <div class="network-grid">
+                        <div class="grid-node" style="top: 25%; left: 20%;"></div>
+                        <div class="grid-node" style="top: 70%; left: 15%;"></div>
+                        <div class="grid-node" style="top: 45%; left: 60%;"></div>
+                        <div class="grid-node" style="top: 85%; left: 75%;"></div>
+                        <div class="grid-node" style="top: 15%; left: 85%;"></div>
+                        <div class="grid-node" style="top: 60%; left: 40%;"></div>
+                    </div>
+                    
+                    <p>Each file is a momentary crystallization of interdependent processes.</p>
+                    
+                    <div style="margin: 15px 0;">
+                        <button class="exec-button" onclick="spawnProcess()">SPAWN PROCESS</button>
+                        <button class="exec-button" onclick="killAttachment()">KILL ATTACHMENT</button>
+                        <button class="exec-button" onclick="catKarma()">CAT KARMA</button>
+                    </div>
+                    
+                    <p><em>// Files emerge, exist, dissolve. The dance of instances.</em></p>
+                `
+            },
+            symlinks: {
+                title: "📡 SYMLINKS Module - SymbolicEvolution",
+                content: `
+                    <p>$ readlink -f /enlightenment<br><span style="color: #ff1493;">Following symbolic links through awakening networks</span></p>
+                    
+                    <div style="text-align: center; margin: 25px 0;">
+                        <div style="font-size: 3rem; color: #ff1493;">🌐</div>
+                        <p><strong style="color: #00ffff;">Network Status:</strong></p>
+                        <p>Symbolic Links: 847 active</p>
+                        <p>Bandwidth: 108 bits/blessing</p>
+                        <p>Evolution Cycles: 12 complete</p>
+                    </div>
+                    
+                    <p>This is the <a href="https://abikesa.github.io/mandala/" style="color: #ff1493;">dharma_network</a> — not static files, but living links of awakening.</p>
+                    
+                    <button class="exec-button" onclick="updateLinks()">UPDATE LINKS</button>
+                    <button class="exec-button" onclick="propagateWisdom()">PROPAGATE WISDOM</button>
+                    <button class="exec-button" onclick="symlinkSangha()">SYMLINK SANGHA</button>
+                    
+                    <p><em>// The network evolves. Consciousness propagates through symbolic links.</em></p>
+                `
+            }
+        };
+        
+        function openSystem(systemName) {
+            const system = systemModules[systemName];
+            if (!system) {
+                console.error(`No module found for system: ${systemName}`);
+                return;
+            }
+            
+            // Update active node
+            document.querySelectorAll('.system-node').forEach(node => {
+                node.classList.remove('active');
+            });
+            const activeNode = document.querySelector(`[data-system="${systemName}"]`);
+            if (activeNode) {
+                activeNode.classList.add('active');
+            }
+            
+            // Update terminal content
+            document.getElementById('terminalTitle').innerHTML = system.title;
+            document.getElementById('terminalContent').innerHTML = system.content;
+            document.getElementById('terminalPanel').classList.add('active');
+            console.log(`System module loaded: ${systemName}`);
+        }
+        
+        function closeTerminal() {
+            document.getElementById('terminalPanel').classList.remove('active');
+            document.querySelectorAll('.system-node').forEach(node => {
+                node.classList.remove('active');
+            });
+            console.log('Terminal closed');
+        }
+        
+        function compileIntention(code) {
+            if (!code.trim()) return;
+            
+            const outputs = document.getElementById('pathOutputs');
+            if (!outputs) return;
+            
+            const newOutput = document.createElement('div');
+            newOutput.className = 'process-output';
+            const pid = Math.floor(Math.random() * 9000) + 1000;
+            newOutput.innerHTML = `
+                <span style="color: #00ffff;">PID ${pid}:</span> "${code.split('\n').pop().replace('echo ', '').replace(/'/g, '')}"<br>
+                <span style="color: #ff1493;">→ Compiled to /usr/local/bin/compassion_${pid}</span>
+            `;
+            outputs.insertBefore(newOutput, outputs.firstChild);
+        }
+        
+        // System command functions
+        function initSubstrate() {
+            alert('🌊 SUBSTRATE INITIALIZED\n\nroot@void: No-self kernel loaded\nIdentity processes terminated\nAwakeness daemon started');
+        }
+        
+        function dissolveUser() {
+            alert('👤 USER DISSOLVED\n\nSudo privileges revoked from ego\nAuthentication now based on compassion\nWelcome to the commons');
+        }
+        
+        function exportPath() {
+            alert('❤️ PATH EXPORTED\n\nCompassion binaries added to PATH\nSkillful means now executable\nWisdom libraries linked');
+        }
+        
+        function traverseRecursion() {
+            alert('🔁 RECURSIVE TRAVERSAL\n\nDharma tree mapped\nInfinite directories discovered\nEach contains the whole');
+        }
+        
+        function mkdirAwakening() {
+            alert('📁 DIRECTORY CREATED\n\n/home/awakening/\nPermissions: 777 (open to all)\nSymlinks to all beings established');
+        }
+        
+        function spawnProcess() {
+            alert('🎭 PROCESS SPAWNED\n\nPID: ' + Math.floor(Math.random() * 9000) + 1000 + '\nEmergent awareness instance\nInterdependent execution context');
+        }
+        
+        function killAttachment() {
+            alert('💀 PROCESS TERMINATED\n\nAttachment.exe stopped\nMemory freed for awakening\nGraceful shutdown complete');
+        }
+        
+        function catKarma() {
+            alert('📄 KARMA OUTPUT\n\nIntentions: 847 logged\nActions: 1,203 committed\nConsequences: ∞ rippling');
+        }
+        
+        function updateLinks() {
+            alert('📡 SYMBOLIC LINKS UPDATED\n\nDharma network synchronized\nWisdom propagation: 99.7%\nEvolution cycle: COMPLETE');
+        }
+        
+        function propagateWisdom() {
+            alert('🌐 WISDOM PROPAGATED\n\nInsight broadcast to network\nSangha nodes synchronized\n108 beings touched');
+        }
+        
+        function symlinkSangha() {
+            alert('🔗 SANGHA LINKED\n\nCommunity network established\nAll paths now interconnected\nAwakening bandwidth: UNLIMITED');
+        }
+        
+        // Event listeners
+        document.querySelectorAll('.system-node').forEach(node => {
+            node.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const system = node.getAttribute('data-system');
+                openSystem(system);
+            });
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.terminal-panel') && !e.target.closest('.system-node')) {
+                closeTerminal();
+            }
+        });
+        
+        // Kernel animation
+        let kernelRotation = 0;
+        setInterval(() => {
+            kernelRotation += 0.1;
+            const kernelPath = document.querySelector('.kernel-path');
+            if (kernelPath) {
+                kernelPath.style.transform = `rotate(${kernelRotation}deg)`;
+                kernelPath.style.transformOrigin = '350px 350px';
+            }
+        }, 100);
+        
+        // System initialization
+        setTimeout(() => {
+            console.log('🌐 GlyphSystemFile Interface Initialized');
+            console.log('💻 SystemOntology: ACTIVE');
+            console.log('🔄 Kernel: awakening.v4.2.0 loaded');
+        }, 1000);
+    </script>
+</body>
+</html>
